@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QC Time Tracker</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{background:#07071a}
+body{width:430px;background:#07071a;font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;color:#e2e8f0;font-size:14px;border-radius:16px}
+:root{--bg:#07071a;--card:#0d0d22;--card2:#11112b;--border:#1c1c3a;--accent:#7c3aed;--red:#ef4444;--text:#e2e8f0;--text-muted:#6b7280}
+
+/* Light theme */
+body[data-theme="light"]{--bg:#f8fafc;--card:#ffffff;--card2:#f1f5f9;--border:#e2e8f0;--text:#1e293b;--text-muted:#64748b}
+body[data-theme="light"]{background:#f8fafc;color:#1e293b}
+body[data-theme="light"] .hdr{background:linear-gradient(135deg,#f1f5f9,#e2e8f0);border-bottom:1px solid #cbd5e1}
+body[data-theme="light"] .field input,body[data-theme="light"] .field select,body[data-theme="light"] .field textarea{background:#ffffff;border-color:#e2e8f0;color:#1e293b}
+body[data-theme="light"] .field input:focus,body[data-theme="light"] .field select:focus,body[data-theme="light"] .field textarea:focus{background:#f8fafc;border-color:#7c3aed}
+body[data-theme="light"] .timer-box{background:#ffffff;border-color:#e2e8f0}
+body[data-theme="light"] .stat-card,body[data-theme="light"] .filter-bar,body[data-theme="light"] .dd-list{background:#ffffff;border-color:#e2e8f0}
+body[data-theme="light"] .dd-item:hover,body[data-theme="light"] .dd-item.sel{background:rgba(124,58,237,.08)}
+body[data-theme="light"] thead tr{background:linear-gradient(135deg,#f1f5f9,#e2e8f0)}
+body[data-theme="light"] th{border-bottom:1px solid #e2e8f0;color:#64748b}
+body[data-theme="light"] td{border-bottom:1px solid #f1f5f9;color:#475569}
+body[data-theme="light"] .login-wrap{background:#f8fafc}
+body[data-theme="light"] .empty{color:#94a3b8}
+body[data-theme="light"] .hdr-sub{color:#64748b}
+body[data-theme="light"] .foot{color:#94a3b8}
+body[data-theme="light"] .btn-ghost{background:transparent;border-color:#e2e8f0;color:#64748b}
+body[data-theme="light"] .btn-ghost:hover{border-color:#cbd5e1;color:#475569}
+body[data-theme="light"] ::-webkit-scrollbar-track{background:#f1f5f9}
+body[data-theme="light"] ::-webkit-scrollbar-thumb{background:#cbd5e1}
+body[data-theme="light"] ::-webkit-scrollbar-thumb:hover{background:#94a3b8}
+body[data-theme="light"] .recent-label{color:#64748b}
+body[data-theme="light"] .recent-item{background:#f1f5f9;border-color:#e2e8f0}
+body[data-theme="light"] .recent-item:hover{background:#e2e8f0}
+
+/* ---- Light theme: fill the remaining gaps so nothing stays dark ---- */
+body[data-theme="light"] .tabs-container{background:#f1f5f9;border-bottom-color:#e2e8f0}
+body[data-theme="light"] .tab{background:#ffffff;border-color:#e2e8f0;color:#475569}
+body[data-theme="light"] .tab:hover{background:#f8fafc;border-color:rgba(124,58,237,.4)}
+body[data-theme="light"] .tab.active{background:rgba(124,58,237,.12);border-color:rgba(124,58,237,.45);color:#6d28d9}
+body[data-theme="light"] #btn-new-tab{background:#ffffff;border-color:#e2e8f0;color:#64748b}
+body[data-theme="light"] #btn-new-tab:hover{border-color:rgba(124,58,237,.4);color:#6d28d9}
+body[data-theme="light"] .dd-list{box-shadow:0 12px 36px rgba(2,6,23,.12)}
+body[data-theme="light"] .dd-item{color:#334155;border-bottom-color:rgba(15,23,42,.05)}
+body[data-theme="light"] .dd-item:hover,body[data-theme="light"] .dd-item.sel{color:#6d28d9}
+body[data-theme="light"] .shortcuts-hint{background:#f1f5f9;border-color:#e2e8f0;color:#64748b}
+body[data-theme="light"] .shortcuts-hint kbd{background:#e2e8f0;border-color:#cbd5e1;color:#334155}
+body[data-theme="light"] .tbl-wrap{border-color:#e2e8f0}
+body[data-theme="light"] td{border-bottom-color:#f1f5f9}
+body[data-theme="light"] tr:hover td{background:rgba(15,23,42,.02)}
+body[data-theme="light"] .stat-val{color:#1e293b}
+body[data-theme="light"] .stat-lbl,body[data-theme="light"] .timer-lbl,body[data-theme="light"] .sec-label,body[data-theme="light"] .recent-label{color:#64748b}
+body[data-theme="light"] .confirm-box{background:#ffffff;border-color:#e2e8f0;box-shadow:0 20px 60px rgba(2,6,23,.25)}
+body[data-theme="light"] .confirm-title{color:#6d28d9}
+body[data-theme="light"] .confirm-message{color:#475569}
+body[data-theme="light"] .confirm-btn-no{background:#f1f5f9;border-color:#e2e8f0;color:#475569}
+body[data-theme="light"] .confirm-btn-no:hover{background:#e2e8f0}
+body[data-theme="light"] .login-sub{color:#64748b}
+body[data-theme="light"] .rt-client,body[data-theme="light"] .tab-close,body[data-theme="light"] .chevron{color:#94a3b8}
+
+/* small helper note under inputs */
+.hint-note{font-size:11px;color:var(--text-muted);margin-top:5px}
+
+.screen{display:none}
+.screen.active{display:block;animation:fi 0.18s ease}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* Header */
+.hdr{background:linear-gradient(135deg,#130d30,#0d0d22);border-radius:16px 16px 0 0;padding:14px 18px;border-bottom:1px solid #1c1c3a;display:flex;align-items:center;justify-content:space-between}
+.hdr-logo{display:flex;align-items:center;gap:10px}
+.hdr-icon{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 16px rgba(124,58,237,.35);object-fit:contain;padding:2px;font-weight:800;letter-spacing:.5px}
+.hdr-title{font-size:15px;font-weight:800;background:linear-gradient(135deg,#a78bfa,#60a5fa);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr-sub{color:#4b5568;font-size:11px}
+.hdr-btns{display:flex;gap:7px;align-items:center}
+
+/* Buttons */
+.btn{padding:8px 13px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .2s;font-family:inherit}
+.btn-ghost{background:transparent;border:1px solid #1c1c3a;color:#6b7280}
+.btn-ghost:hover{border-color:#374151;color:#9ca3af}
+.btn-purple{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.35);color:#a78bfa}
+.btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border:none;border-radius:11px;font-size:14.5px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(124,58,237,.35);transition:all .2s;font-family:inherit}
+.btn-primary:hover{box-shadow:0 6px 26px rgba(124,58,237,.5);transform:translateY(-1px)}
+.btn-primary:disabled{background:#1c1c3a;color:#374151;cursor:not-allowed;box-shadow:none;transform:none}
+.btn-green{background:linear-gradient(135deg,#059669,#0d9488);color:#fff;box-shadow:0 4px 14px rgba(5,150,105,.3)}
+.btn-red{background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;box-shadow:0 4px 14px rgba(220,38,38,.3)}
+.btn-amber{background:linear-gradient(135deg,#d97706,#b45309);color:#fff;box-shadow:0 4px 14px rgba(217,119,6,.3)}
+.btn-resume{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;box-shadow:0 4px 14px rgba(124,58,237,.3)}
+.btn-dim{background:#12122a !important;color:#2d2d5e !important;cursor:not-allowed !important;box-shadow:none !important;transform:none !important}
+.btn-icon{padding:8px 10px;font-size:14px}
+/* Header: two equal pills, elegant and consistent */
+.hdr-pill{background:rgba(124,58,237,.14);border:1px solid rgba(124,58,237,.35);color:#c4b5fd;padding:9px 14px;border-radius:10px;font-weight:700;letter-spacing:.2px;min-width:118px;text-align:center}
+.hdr-pill:hover{background:rgba(124,58,237,.26);border-color:rgba(124,58,237,.55);color:#fff}
+body[data-theme="light"] .hdr-pill{background:#f1ecfd;border-color:#ddd2fb;color:#6d28d9}
+body[data-theme="light"] .hdr-pill:hover{background:#e6dbfb}
+
+/* Dashboard breathes in a full tab: widen just the admin screen */
+body.tab-mode.wide-mode{max-width:100%;width:100%}
+body.tab-mode.wide-mode .content{max-width:100%;padding-left:26px;padding-right:26px}
+body.tab-mode.wide-mode .hdr{padding-left:26px;padding-right:26px}
+.wide-mode .tbl-wrap{overflow-x:auto}
+.wide-mode table{width:100%}
+
+/* Theme picker swatches (Settings) */
+.theme-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+.theme-swatch{border:2px solid #1c1c3a;border-radius:11px;padding:10px 6px;cursor:pointer;text-align:center;font-size:11.5px;font-weight:700;color:#9ca3af;background:#0d0d22;transition:all .2s;font-family:inherit}
+.theme-swatch .sw{width:100%;height:22px;border-radius:7px;margin-bottom:7px}
+.theme-swatch:hover{border-color:#374151}
+.theme-swatch.selected{border-color:#a78bfa;color:#e2e8f0;box-shadow:0 0 0 3px rgba(124,58,237,.18)}
+body[data-theme="light"] .theme-swatch{background:#f8fafc;border-color:#e2e8f0;color:#64748b}
+body[data-theme="light"] .theme-swatch.selected{border-color:#7c3aed;color:#1e293b}
+
+/* Content */
+.content{padding:18px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:10.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.9px;margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;background:#11112b;border:1px solid #1c1c3a;border-radius:10px;padding:10px 13px;color:#e2e8f0;font-size:13.5px;outline:none;font-family:inherit;transition:border-color .2s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(124,58,237,.5);background:#13132a}
+.field textarea{resize:vertical;min-height:72px;line-height:1.5}
+.req{color:#ef4444}
+
+/* Dropdown */
+.dd-wrap{position:relative}
+.dd-input-row{position:relative}
+.dd-input-row input{padding-right:32px}
+.chevron{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#4b5568;pointer-events:none;font-size:11px}
+.dd-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#13132a;border:1px solid #1c1c3a;border-radius:12px;z-index:999;max-height:180px;overflow-y:auto;box-shadow:0 12px 36px rgba(0,0,0,.6);display:none}
+.dd-list.open{display:block}
+.dd-item{padding:9px 14px;font-size:13px;color:#cbd5e1;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.03);display:flex;align-items:center;justify-content:space-between}
+.dd-item:hover,.dd-item.sel{background:rgba(124,58,237,.12);color:#a78bfa}
+.dd-item:last-child{border-bottom:none}
+.sel-badge{display:inline-block;margin-top:5px;background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.3);padding:3px 10px;border-radius:6px;font-size:11.5px;font-weight:600}
+
+/* Recent Tickets */
+.recent-section{margin-bottom:16px}
+.recent-label{font-size:10.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.9px;margin-bottom:8px}
+.recent-list{display:flex;flex-direction:column;gap:6px}
+.recent-item{background:#11112b;border:1px solid #1c1c3a;border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .2s;text-align:left;display:flex;flex-direction:column;gap:2px}
+.recent-item:hover{background:#1c1c3a;border-color:rgba(124,58,237,.3)}
+.rt-ticket{font-size:12px;font-weight:700;color:#a78bfa}
+.rt-client{font-size:11px;color:#6b7280}
+
+/* Timer */
+.timer-box{background:#09091e;border:1px solid #1c1c3a;border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.timer-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.timer-lbl{font-size:10.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.9px}
+.timer-state{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;transition:color .3s}
+.timer-display{text-align:center;font-family:'Courier New',monospace;font-size:44px;font-weight:800;letter-spacing:4px;padding:4px 0 12px;transition:color .3s,text-shadow .3s}
+.timer-btns{display:flex;gap:8px}
+.timer-btns .btn{flex:1;padding:9px 4px;font-size:12.5px;border-radius:10px;border:none;cursor:pointer;font-family:inherit;font-weight:700;transition:all .2s}
+
+/* Tabs */
+.tabs-container{display:flex;gap:8px;padding:10px 18px;border-bottom:1px solid #1c1c3a;background:#0a0a1f;flex-wrap:wrap;align-items:center;overflow-x:auto;min-height:50px}
+.tabs-list{display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex:1;min-height:34px}
+.tab{background:#11112b;border:1px solid #1c1c3a;border-radius:8px;padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:12px;color:#cbd5e1;transition:all .2s;white-space:nowrap}
+.tab:hover{border-color:rgba(124,58,237,.4);background:#13132a}
+.tab.active{background:rgba(124,58,237,.2);border-color:rgba(124,58,237,.5);color:#a78bfa;font-weight:600}
+.tab-ticket{font-weight:600}
+.tab-state{font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(124,58,237,.15);color:#a78bfa}
+.tab-state.running{background:rgba(167,139,250,.15);color:#a78bfa}
+.tab-state.paused{background:rgba(245,158,11,.15);color:#f59e0b}
+.tab-close{cursor:pointer;background:transparent;border:none;color:#6b7280;padding:0;font-size:12px}
+.tab-close:hover{color:#ef4444}
+#btn-new-tab{background:transparent;border:1px solid #1c1c3a;color:#6b7280}
+#btn-new-tab:hover{border-color:rgba(124,58,237,.4);color:#a78bfa}
+
+/* Confirmation Dialog */
+#confirm-dialog{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:10000;font-family:inherit}
+.confirm-box{background:#11112b;border:1px solid #1c1c3a;border-radius:12px;padding:20px;max-width:320px;box-shadow:0 20px 60px rgba(0,0,0,.8)}
+.confirm-title{font-size:16px;font-weight:700;color:#a78bfa;margin-bottom:8px}
+.confirm-message{font-size:13px;color:#cbd5e1;margin-bottom:18px;line-height:1.5}
+.confirm-buttons{display:flex;gap:10px}
+.confirm-btn{flex:1;padding:9px;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px;border:none;font-family:inherit}
+.confirm-btn-no{background:#1c1c3a;border:1px solid #374151;color:#cbd5e1}
+.confirm-btn-no:hover{background:#2d2d5e}
+.confirm-btn-yes{background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff}
+.confirm-btn-yes:hover{box-shadow:0 4px 14px rgba(220,38,38,.3)}
+
+/* Dashboard edit modal — mirrors the confirm dialog's overlay pattern */
+#edit-dialog{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:10000;font-family:inherit;padding:20px}
+.edit-box{background:#11112b;border:1px solid #1c1c3a;border-radius:14px;padding:22px;max-width:420px;width:100%;max-height:86vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.8)}
+.edit-title{font-size:16px;font-weight:700;color:#a78bfa;margin-bottom:14px}
+.edit-field{margin-bottom:13px}
+.edit-field label{display:block;font-size:10.5px;font-weight:700;color:#8b87a3;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px}
+.edit-field input,.edit-field select,.edit-field textarea{width:100%;padding:9px 11px;border-radius:8px;border:1px solid #2a2a4a;background:#0d0d22;color:#e2e8f0;font-size:13px;font-family:inherit}
+.edit-field textarea{resize:vertical;min-height:56px}
+.edit-seg{display:flex;gap:6px;background:#0d0d22;border:1px solid #2a2a4a;border-radius:10px;padding:4px}
+.edit-seg button{flex:1;padding:8px;border:none;border-radius:7px;background:transparent;color:#8b87a3;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit}
+.edit-seg button.active{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff}
+.edit-buttons{display:flex;gap:10px;margin-top:16px}
+.edit-btn{flex:1;padding:10px;border-radius:8px;cursor:pointer;font-weight:700;font-size:12.5px;border:none;font-family:inherit}
+.edit-btn-cancel{background:#1c1c3a;border:1px solid #374151;color:#cbd5e1}
+.edit-btn-cancel:hover{background:#2d2d5e}
+.edit-btn-save{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff}
+.edit-btn-save:hover{box-shadow:0 4px 14px rgba(124,58,237,.4)}
+body[data-theme="light"] .edit-box{background:#ffffff;border-color:#e2e8f0;box-shadow:0 20px 60px rgba(2,6,23,.25)}
+body[data-theme="light"] .edit-title{color:#6d28d9}
+body[data-theme="light"] .edit-field label{color:#64748b}
+body[data-theme="light"] .edit-field input,body[data-theme="light"] .edit-field select,body[data-theme="light"] .edit-field textarea{background:#f8fafc;border-color:#e2e8f0;color:#1e293b}
+body[data-theme="light"] .edit-seg{background:#f1f5f9;border-color:#e2e8f0}
+body[data-theme="light"] .edit-seg button{color:#64748b}
+body[data-theme="light"] .edit-btn-cancel{background:#f1f5f9;border-color:#e2e8f0;color:#475569}
+body[data-theme="light"] .edit-btn-cancel:hover{background:#e2e8f0}
+
+/* Dashboard row action buttons */
+.row-actions{display:flex;gap:6px;white-space:nowrap}
+.row-act-btn{border:none;border-radius:6px;padding:5px 9px;font-size:12px;cursor:pointer;font-family:inherit}
+.row-act-edit{background:rgba(124,58,237,.15);color:#a78bfa}
+.row-act-edit:hover{background:rgba(124,58,237,.28)}
+.row-act-delete{background:rgba(220,38,38,.15);color:#f87171}
+.row-act-delete:hover{background:rgba(220,38,38,.28)}
+.row-act-delete[disabled],.row-act-edit[disabled]{background:transparent;color:#4b4763;cursor:not-allowed;opacity:.6}
+body[data-theme="light"] .row-act-edit{background:#f3ecff;color:#7c3aed}
+body[data-theme="light"] .row-act-edit:hover{background:#e6d9ff}
+body[data-theme="light"] .row-act-delete{background:#fef2f2;color:#dc2626}
+body[data-theme="light"] .row-act-delete:hover{background:#fee2e2}
+body[data-theme="light"] .row-act-delete[disabled],body[data-theme="light"] .row-act-edit[disabled]{background:transparent;color:#cbd5e1}
+
+/* Alert */
+.alert{margin-bottom:12px;padding:10px 14px;border-radius:9px;font-size:13px;font-weight:500;display:none}
+.alert-ok{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#34d399}
+.alert-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171}
+
+/* Login */
+.login-wrap{padding:20px;display:flex;align-items:center;justify-content:center;min-height:480px}
+.login-card{width:100%;max-width:340px}
+.login-icon{width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 14px;box-shadow:0 0 30px rgba(124,58,237,.4);object-fit:contain;padding:4px;font-weight:800;letter-spacing:.5px}
+.login-title{font-size:20px;font-weight:800;background:linear-gradient(135deg,#a78bfa,#60a5fa);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin-bottom:4px}
+.login-sub{color:#4b5568;font-size:12.5px;text-align:center;margin-bottom:22px}
+
+/* Admin */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat-card{background:#11112b;border:1px solid #1c1c3a;border-radius:10px;padding:12px}
+.stat-icon{font-size:18px;margin-bottom:4px}
+.stat-lbl{color:#6b7280;font-size:10px;text-transform:uppercase;letter-spacing:.7px}
+.stat-val{font-size:22px;font-weight:800;margin-top:2px}
+.filter-bar{background:#11112b;border:1px solid #1c1c3a;border-radius:12px;padding:14px;margin-bottom:14px}
+.filter-row{display:flex;gap:10px;flex-wrap:wrap}
+.filter-row .field{margin-bottom:0;flex:1;min-width:120px}
+.filter-actions{display:flex;gap:8px;margin-top:12px}
+.sec-label{font-size:10.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid #1c1c3a}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:600px}
+thead tr{background:linear-gradient(135deg,#13132a,#0f0f22)}
+th{padding:10px 12px;text-align:left;color:#6b7280;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid #1c1c3a;white-space:nowrap}
+td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.03);color:#94a3b8}
+tr:hover td{background:rgba(255,255,255,.015)}
+.bp{background:rgba(124,58,237,.15);color:#a78bfa;padding:2px 7px;border-radius:5px;font-size:11px;font-weight:600}
+.bg{font-family:monospace;background:rgba(52,211,153,.1);color:#34d399;padding:2px 7px;border-radius:5px;font-size:11px}
+.bb{color:#60a5fa;font-weight:600}
+.empty{text-align:center;padding:36px;color:#4b5568}
+.empty .ei{font-size:30px;margin-bottom:8px}
+.foot{text-align:center;color:#2d2d5e;font-size:11px;margin-top:12px}
+.admin-status{background:#11112b;border:1px solid #1c1c3a;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#6b7280;line-height:1.5}
+.sync-meta{font-size:11px;color:#6b7280;line-height:1.5}
+
+/* Keyboard shortcuts hint */
+.shortcuts-hint{background:#11112b;border:1px solid #1c1c3a;border-radius:8px;padding:10px 12px;margin-top:12px;font-size:11px;color:#6b7280}
+.shortcuts-hint kbd{background:#1c1c3a;border:1px solid #2d2d5e;border-radius:4px;padding:2px 6px;font-family:monospace;font-size:10px}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:#09091e}
+::-webkit-scrollbar-thumb{background:#1c1c3a;border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:#2d2d5e}
+
+/* Tab mode (opened in a full browser tab instead of the tiny popup) */
+body.tab-mode{width:100%;max-width:680px;margin:0 auto;min-height:100vh;border-radius:0}
+.tab-mode .hdr{border-radius:0}
+body.tab-mode .content{max-width:640px}
+
+/* Date picker with visible calendar icon */
+.date-picker{background:#09091e;border:1px solid #1c1c3a;border-radius:10px;padding:10px 35px 10px 13px;color:#e2e8f0;font-size:13.5px;font-family:inherit;cursor:pointer;width:100%;position:relative}
+.date-picker::-webkit-calendar-picker-indicator{filter:invert(1);opacity:0.7;cursor:pointer;position:absolute;right:10px;top:50%;transform:translateY(-50%)}
+.date-picker::-webkit-calendar-picker-indicator:hover{opacity:1}
+body[data-theme="light"] .date-picker{background:#ffffff;border-color:#e2e8f0;color:#1e293b}
+body[data-theme="light"] .date-picker::-webkit-calendar-picker-indicator{filter:none}
+body[data-theme="light"] .admin-status{background:#ffffff;border-color:#e2e8f0;color:#64748b}
+body[data-theme="light"] .sync-meta{color:#64748b}
+
+/* ══════ Light theme — teal palette ══════ */
+body[data-theme="light"]{background:#eef1f0;color:#16302f}
+body[data-theme="light"] .hdr{background:#ffffff;border-bottom:1px solid #dde3e2}
+body[data-theme="light"] .hdr-icon,body[data-theme="light"] .login-icon{background:linear-gradient(135deg,#0f4645,#15706a);box-shadow:0 4px 14px rgba(15,70,69,.22)}
+body[data-theme="light"] .hdr-title,body[data-theme="light"] .login-title{background:none;-webkit-text-fill-color:#0f4645;color:#0f4645}
+body[data-theme="light"] .hdr-pill{background:#0f4645;border-color:#0f4645;color:#ffffff}
+body[data-theme="light"] .hdr-pill:hover{background:#15706a;border-color:#15706a;color:#ffffff}
+body[data-theme="light"] .btn-primary,body[data-theme="light"] .btn-resume{background:linear-gradient(135deg,#0f4645,#15706a);box-shadow:0 4px 16px rgba(15,70,69,.26)}
+body[data-theme="light"] .btn-primary:hover{box-shadow:0 6px 22px rgba(15,70,69,.34)}
+body[data-theme="light"] .seg{background:#f1f5f4;border-color:#dde3e2}
+body[data-theme="light"] .seg-btn.active{background:#0f4645;color:#ffffff;box-shadow:0 2px 10px rgba(15,70,69,.25)}
+body[data-theme="light"] .stat-card,body[data-theme="light"] .filter-bar,body[data-theme="light"] .tbl-wrap,body[data-theme="light"] .admin-status{background:#ffffff;border-color:#dde3e2}
+body[data-theme="light"] .stat-val{color:#0f4645}
+body[data-theme="light"] th{background:#0f4645;color:#ffffff;border-bottom:none}
+body[data-theme="light"] td{color:#16302f;border-bottom-color:#eef1f0}
+body[data-theme="light"] tr:hover td{background:#f6f9f8}
+body[data-theme="light"] .bp{background:#e3edec;color:#0f4645}
+body[data-theme="light"] .bb{color:#0f4645}
+body[data-theme="light"] .bg{background:#e3edec;color:#0f4645}
+body[data-theme="light"] .tab.active{background:#e3edec;border-color:#bcd6d4;color:#0f4645}
+body[data-theme="light"] .sel-badge{background:#e3edec;border:1px solid #bcd6d4;color:#0f4645}
+body[data-theme="light"] .timer-display{color:#0f4645 !important}
+body[data-theme="light"] .row-act-edit{background:#e3edec;color:#0f4645}
+body[data-theme="light"] .row-act-edit:hover{background:#cfe2e0}
+body[data-theme="light"] .theme-swatch.selected{border-color:#0f4645;box-shadow:0 0 0 3px rgba(15,70,69,.15)}
+body[data-theme="light"] .edit-btn-save{background:linear-gradient(135deg,#0f4645,#15706a)}
+body[data-theme="light"] .edit-seg button.active{background:#0f4645}
+body[data-theme="light"] .edit-title{color:#0f4645}
+/* Settings cards carry inline dark styles — repaint them for light mode */
+body[data-theme="light"] div[style*="#13132a"]{background:#ffffff !important;border-color:#dde3e2 !important}
+body[data-theme="light"] .sec-label{color:#5b6b6a}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="screen-login" class="screen active">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-icon">QC</div>
+      <div class="login-title">QC Time Tracker</div>
+      <div class="login-sub">Sign in to start tracking your work</div>
+      <div class="field">
+        <label>Full Name <span class="req">*</span></label>
+        <input type="text" id="ln-name" placeholder="Enter your full name" />
+      </div>
+      <div class="field">
+        <label>Email Address <span class="req">*</span></label>
+        <input type="email" id="ln-email" placeholder="Enter your email" />
+      </div>
+      <div id="ln-err" class="alert alert-err"></div>
+      <button class="btn-primary" id="btn-login">Sign In →</button>
+      <div class="foot" style="margin-top:12px">🔒 No password required · Team access</div>
+      <div class="shortcuts-hint">
+        <strong>💡 Tip:</strong> Use the timer buttons to track your work time
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TRACKER ═══ -->
+<div id="screen-tracker" class="screen">
+  <div class="hdr">
+    <div class="hdr-logo">
+      <div class="hdr-icon">QC</div>
+      <div>
+        <div class="hdr-title">QC Time Tracker</div>
+        <div class="hdr-sub" id="tr-user">👤 —</div>
+      </div>
+    </div>
+    <div class="hdr-btns">
+      <button class="btn hdr-pill" id="btn-settings" title="Settings, theme &amp; sign out">⚙️ Settings</button>
+      <button class="btn hdr-pill" id="btn-admin" title="Opens in a new tab">📊 Dashboard</button>
+    </div>
+  </div>
+  
+  <!-- TABS SECTION -->
+  <div class="tabs-container">
+    <div class="tabs-list" id="tabs-list">
+      <!-- Tabs will be dynamically generated here -->
+    </div>
+    <button class="btn btn-icon" id="btn-new-tab" title="New Session" style="padding:8px 10px;">➕</button>
+  </div>
+  
+  <div class="content">
+    <div class="g2">
+      <div class="field">
+        <label>Ticket No. <span class="req">*</span></label>
+        <input type="text" id="f-ticket" placeholder="e.g. TKT-0042" />
+        <div class="hint-note">⏱ Timer starts automatically once you type a ticket number.</div>
+      </div>
+      <div class="field">
+        <label>Client Name <span class="req">*</span></label>
+        <input type="text" id="f-client" placeholder="Client name" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Ticket Type <span class="req">*</span></label>
+      <div class="dd-wrap" id="dd-wrap">
+        <div class="dd-input-row">
+          <input type="text" id="tt-search" placeholder="Search or select ticket type..." autocomplete="off" />
+          <span class="chevron" id="tt-chevron">▼</span>
+        </div>
+        <div class="dd-list" id="tt-list"></div>
+      </div>
+      <div id="tt-badge"></div>
+    </div>
+
+    <div class="field">
+      <label>Number of Orders</label>
+      <input type="number" id="f-orders" placeholder="Enter number" min="0" />
+    </div>
+
+    <div class="field">
+      <label>Order Number</label>
+      <input type="text" id="f-ordernum" placeholder="Paste order numbers e.g. 664252, 4755115" autocomplete="off" />
+      <div class="hint-note">Paste one or many — saved comma-separated in a single Excel cell.</div>
+    </div>
+
+    <!-- Timer -->
+    <div class="timer-box">
+      <div class="timer-hdr">
+        <span class="timer-lbl">Timer</span>
+        <span class="timer-state" id="t-slabel" style="color:#374151">READY</span>
+      </div>
+      <div class="timer-display" id="t-disp" style="color:#2d2d5e">00:00:00</div>
+      <div class="timer-btns">
+        <button id="btn-toggle" class="btn btn-green" style="flex:1">▶ Start</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Comments</label>
+      <textarea id="f-comment" placeholder="Add notes or comments..."></textarea>
+    </div>
+
+    <div id="tr-msg" class="alert"></div>
+    <button class="btn-primary" id="tr-submit" disabled>■ Stop & Submit ✓</button>
+    <div class="foot">⚡ Saves locally first. If the shared OneDrive folder is connected, this entry is also written to your team file.</div>
+    
+    <div class="shortcuts-hint">
+      <strong>💡 Tip:</strong> Fill in all required fields (*) before submitting
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN ═══ -->
+<div id="screen-admin" class="screen">
+  <div class="hdr">
+    <div class="hdr-logo">
+      <div class="hdr-icon" style="font-size:14px">📊</div>
+      <div>
+        <div class="hdr-title">Admin Dashboard</div>
+        <div class="hdr-sub">Local records + shared OneDrive team data</div>
+      </div>
+    </div>
+    <button class="btn btn-ghost" id="btn-back">← Back</button>
+  </div>
+  <div class="content">
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📋</div>
+        <div class="stat-lbl">Records</div>
+        <div class="stat-val" id="s-total" style="color:#a78bfa">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-lbl">Users</div>
+        <div class="stat-val" id="s-users" style="color:#60a5fa">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-lbl">Date Filter</div>
+        <div class="stat-val" id="s-date" style="color:#34d399;font-size:13px">All</div>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="sec-label">Filters &amp; Export</div>
+      <div class="field" style="margin-bottom:10px">
+        <label>Search</label>
+        <input type="text" id="f-search" placeholder="🔍 Search any field — ticket, client, name, order number..." autocomplete="off" />
+      </div>
+      <div class="filter-row">
+        <div class="field">
+          <label>Select User</label>
+          <select id="f-user" style="background:#09091e;cursor:pointer">
+            <option value="all">All Users</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Date From</label>
+          <input type="date" id="f-date-from" class="date-picker" />
+        </div>
+        <div class="field">
+          <label>Date To</label>
+          <input type="date" id="f-date-to" class="date-picker" />
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-ghost" id="btn-clear" style="flex:1">Clear</button>
+        <button class="btn btn-ghost" id="btn-refresh-team" style="flex:1">↻ Refresh Team Data</button>
+        <button id="btn-csv" style="flex:2;padding:9px 0;background:linear-gradient(135deg,#059669,#0d9488);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(5,150,105,.3)">⬇ Export CSV</button>
+      </div>
+    </div>
+
+    <div id="admin-status" class="admin-status">Showing local records only until a shared folder is connected.</div>
+    <div id="ad-wrap"><div class="empty"><div class="ei">📭</div>No records yet</div></div>
+    <div class="foot" style="margin-top:12px">💡 Open Settings once on each device, choose the same shared OneDrive folder, then use Refresh Team Data to pull the whole team view.</div>
+  </div>
+</div>
+
+<!-- ═══ SETTINGS ═══ -->
+<div id="screen-settings" class="screen">
+  <div class="hdr">
+    <div class="hdr-logo">
+      <div class="hdr-icon" style="font-size:16px">⚙️</div>
+      <div>
+        <div class="hdr-title">Settings</div>
+        <div class="hdr-sub">Configure team sync</div>
+      </div>
+    </div>
+    <button class="btn btn-ghost" id="btn-back-settings">← Back</button>
+  </div>
+  <div class="content">
+    <!-- New Member Setup Guide -->
+    <div style="background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.3);border-radius:12px;padding:14px;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:#60a5fa;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">🚀 New Member? Follow These Steps First</div>
+      <ol style="margin:0 0 0 16px;font-size:12px;color:#cbd5e1;line-height:1.9">
+        <li>Open the share invite email and accept it, or go to <b>onedrive.com → Shared</b></li>
+        <li>Find the team folder → right-click → <b>"Add shortcut to My files"</b></li>
+        <li>Wait 1–2 min for it to appear in <b>File Explorer → OneDrive</b></li>
+        <li>In File Explorer, right-click the folder → <b>"Always keep on this device"</b> (wait for the green ✓)</li>
+        <li>Come back here and click <b>"Choose Shared Folder"</b> below</li>
+        <li>Navigate to that OneDrive folder and click <b>Select Folder</b></li>
+        <li>Click <b>"Test Folder Access"</b> to confirm it works</li>
+      </ol>
+      <div style="margin-top:10px;font-size:11px;color:#6b7280">⚠️ The extension only works with a <b>locally synced</b> copy of the folder — it cannot access OneDrive on the web directly. The folder must be shared with you as <b>"Can edit"</b> (not "Can view").</div>
+    </div>
+
+    <!-- Team Sync Section -->
+    <div style="background:#13132a;border:1px solid #1c1c3a;border-radius:12px;padding:16px;margin-bottom:16px">
+      <div class="sec-label">📁 Shared OneDrive Folder</div>
+      <p style="font-size:12px;color:#6b7280;margin-bottom:12px">Choose the OneDrive folder that is shared with the team and synced to this PC. Each member writes to their own JSON file, and the admin dashboard merges those files for visibility.</p>
+      <div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:#f59e0b;line-height:1.5">
+        <strong>After a browser restart, access must be re-granted.</strong> If you see “permission denied” or “not granted” after restarting Chrome or Edge, click <b>“Re-grant Folder Access”</b> below. It opens a full tab and asks you to allow access again — choose <b>Edit</b>. You will not need to re-pick the folder.
+      </div>
+      
+      <div class="field">
+        <label>Selected Folder</label>
+        <input type="text" id="shared-folder-name" placeholder="No folder selected yet" readonly style="font-size:11px" />
+        <div style="font-size:11px;color:#4b5568;margin-top:6px">
+          ℹ️ Best practice: create one shared folder in OneDrive, make sure everyone syncs it locally, then each person selects that same folder here.
+        </div>
+      </div>
+
+      <div id="folder-status" style="min-height:20px;font-size:12px;margin-bottom:8px"></div>
+      <div id="team-file-hint" class="sync-meta" style="margin-bottom:8px">Sign in first, then choose the shared OneDrive folder.</div>
+      <div id="folder-meta" class="sync-meta" style="margin-bottom:12px">Use the same shared OneDrive folder on every device.</div>
+
+      <div id="regrant-access-btn" style="display:none;margin-bottom:8px">
+        <button class="btn btn-amber" id="btn-regrant-access" style="width:100%;padding:11px">🔑 Re-grant Folder Access (click after each browser restart)</button>
+      </div>
+
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" id="btn-pick-folder" style="flex:1">📁 Choose Shared Folder</button>
+        <button class="btn btn-ghost" id="btn-sync-folder" style="flex:1">⇅ Sync My Data</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btn-ghost" id="btn-clear-folder" style="flex:1">🗑️ Clear Folder</button>
+        <button class="btn btn-ghost" id="btn-open-in-tab" style="flex:1">🔗 Open in Full Tab</button>
+      </div>
+    </div>
+
+    <!-- Test Connection Section -->
+    <div style="background:#13132a;border:1px solid #1c1c3a;border-radius:12px;padding:16px;margin-bottom:16px">
+      <div class="sec-label">🧪 Test Folder Access</div>
+      <p style="font-size:12px;color:#6b7280;margin-bottom:12px">Check that the extension can write your team file into the shared folder from this device.</p>
+      <button class="btn btn-primary" id="btn-test-folder" style="width:100%">🧪 Test Folder Access</button>
+      <div id="test-result" style="font-size:12px;margin-top:10px"></div>
+    </div>
+
+    <!-- Settings Section -->
+    <div style="background:#13132a;border:1px solid #1c1c3a;border-radius:12px;padding:16px;margin-bottom:16px">
+      <div class="sec-label">🔊 Preferences</div>
+      <div style="margin-bottom:12px">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+          <input type="checkbox" id="sound-toggle" style="width:16px;height:16px;cursor:pointer" />
+          <span style="font-size:13px">Enable sound notifications</span>
+        </label>
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+          <input type="checkbox" id="notif-toggle" style="width:16px;height:16px;cursor:pointer" />
+          <span style="font-size:13px">Enable notifications on submit</span>
+        </label>
+      </div>
+      <button class="btn btn-ghost" id="btn-test-notif" style="width:100%;padding:9px;font-size:12.5px">🔔 Send Test Notification</button>
+      <div id="test-notif-result" style="font-size:11.5px;margin-top:8px;line-height:1.6"></div>
+    </div>
+
+    <!-- Theme -->
+    <div style="background:#13132a;border:1px solid #1c1c3a;border-radius:12px;padding:16px;margin-bottom:16px">
+      <div class="sec-label">🎨 Theme</div>
+      <div class="theme-grid" id="theme-grid">
+        <button type="button" class="theme-swatch" data-theme-choice="dark"><div class="sw" style="background:linear-gradient(135deg,#130d30,#4f46e5)"></div>Dark</button>
+        <button type="button" class="theme-swatch" data-theme-choice="light"><div class="sw" style="background:linear-gradient(135deg,#0f4645,#eef1f0)"></div>Light</button>
+      </div>Yellow</button>
+      </div>
+      <div class="hint-note" style="margin-top:9px">Your choice is saved on this device.</div>
+    </div>
+
+    <!-- Account -->
+    <div style="background:#13132a;border:1px solid #1c1c3a;border-radius:12px;padding:16px;margin-bottom:16px">
+      <div class="sec-label">👤 Account</div>
+      <button class="btn btn-ghost" id="btn-logout" style="width:100%;padding:10px;font-size:13px">🚪 Sign Out</button>
+    </div>
+
+    <!-- Help Section -->
+    <div style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:12px;padding:12px;color:#1e293b;font-size:12px;margin-bottom:16px;display:none" data-theme="dark">
+      <strong style="color:#667eea">❓ Need Help?</strong>
+      <ul style="margin:8px 0 0 16px;font-size:11px">
+        <li>Admin creates one shared folder in OneDrive</li>
+        <li>Everyone syncs that folder to their Windows PC</li>
+        <li>Each person chooses that folder in Settings once</li>
+        <li>The extension writes one file per person into that folder</li>
+        <li>Admin Dashboard reads all team files together</li>
+      </ul>
+    </div>
+
+    <div style="background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.3);border-radius:12px;padding:12px;color:#34d399;font-size:12px">
+      <strong>✓ How it works:</strong>
+      <ul style="margin:8px 0 0 16px;font-size:11px">
+        <li>Each team member picks the same shared OneDrive folder</li>
+        <li>When you click "Submit", your entry is written into your own team file</li>
+        <li>Data is always saved locally first, then copied into the shared folder</li>
+        <li>No Azure, Graph API, or published website is required</li>
+      </ul>
+    </div>
+
+    <div class="foot" style="margin-top:16px">
+      See TEAM_SETUP_GUIDE.html in the extension folder for the OneDrive shared-folder setup.
+    </div>
+  </div>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>

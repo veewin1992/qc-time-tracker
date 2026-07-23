@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>QC Time Tracker — Team Setup &amp; Fix Guide</title>
+<style>
+  :root{
+    --violet:#6d28d9; --violet-2:#4f46e5; --ink:#1e1b2e; --muted:#5b5772;
+    --line:#e7e3f0; --card:#ffffff; --bg:#f6f4fb;
+    --ok-bg:#ecfdf5; --ok-bd:#86efac; --ok-tx:#166534;
+    --warn-bg:#fffbeb; --warn-bd:#fcd34d; --warn-tx:#92400e;
+    --bad-bg:#fef2f2; --bad-bd:#fca5a5; --bad-tx:#991b1b;
+    --mono:'SFMono-Regular',ui-monospace,'Cascadia Code','Consolas',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:780px;margin:0 auto;padding:0 22px 80px}
+
+  /* Hero */
+  header.hero{
+    background:linear-gradient(135deg,var(--violet),var(--violet-2));
+    color:#fff;border-radius:0 0 26px 26px;padding:38px 26px 30px;
+    margin-bottom:30px;box-shadow:0 14px 40px -18px rgba(79,70,229,.7);
+  }
+  .hero .wrap{padding:0}
+  .eyebrow{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;opacity:.82}
+  .hero h1{font-size:30px;font-weight:800;letter-spacing:-.5px;margin:6px 0 8px}
+  .hero p{font-size:14.5px;opacity:.94;max-width:560px}
+  .pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+  .pill{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);
+    border-radius:999px;padding:5px 13px;font-size:12px;font-weight:600}
+
+  /* Section labels */
+  .part{display:flex;align-items:center;gap:12px;margin:34px 0 16px}
+  .part .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:#fff;
+    background:var(--ink);border-radius:7px;padding:4px 10px;white-space:nowrap}
+  .part h2{font-size:19px;font-weight:800;letter-spacing:-.3px}
+  .part .who{margin-left:auto;font-size:11px;font-weight:700;text-transform:uppercase;
+    letter-spacing:.6px;color:var(--violet);background:#f1ecfd;border:1px solid #ddd2fb;
+    border-radius:999px;padding:4px 11px;white-space:nowrap}
+
+  /* Steps */
+  .step{background:var(--card);border:1px solid var(--line);border-radius:15px;
+    padding:20px 22px;margin-bottom:14px;box-shadow:0 1px 0 rgba(30,27,46,.03)}
+  .step-head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .num{flex:none;width:30px;height:30px;border-radius:9px;display:flex;align-items:center;
+    justify-content:center;font-weight:800;font-size:14px;color:#fff;
+    background:linear-gradient(135deg,var(--violet),var(--violet-2))}
+  .step-head h3{font-size:15.5px;font-weight:700}
+  .step p{font-size:13.5px;color:var(--muted);margin:6px 0}
+  .step ol,.step ul{margin:8px 0 2px 4px;padding-left:20px}
+  .step li{font-size:13.5px;color:#3d3954;line-height:1.95;margin-bottom:2px}
+  b{color:var(--ink);font-weight:700}
+  code,kbd{font-family:var(--mono);font-size:12px;background:#f2eefb;border:1px solid #e2d9f7;
+    border-radius:5px;padding:2px 7px;color:#4c1d95}
+
+  /* Callouts */
+  .note{border-radius:11px;padding:11px 14px;margin:10px 0;font-size:12.5px;line-height:1.6;border:1px solid}
+  .note.ok{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok-tx)}
+  .note.warn{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-tx)}
+  .note.bad{background:var(--bad-bg);border-color:var(--bad-bd);color:var(--bad-tx)}
+  .note b{color:inherit}
+
+  /* Golden rules */
+  .rules{background:#15122b;color:#e7e3f6;border-radius:16px;padding:22px 24px;margin:8px 0 6px}
+  .rules h3{font-size:15px;font-weight:800;color:#c4b5fd;margin-bottom:14px;
+    text-transform:uppercase;letter-spacing:1px}
+  .rule{display:flex;gap:13px;padding:12px 0;border-top:1px solid #2a2546}
+  .rule:first-of-type{border-top:none}
+  .rule .k{flex:none;width:26px;height:26px;border-radius:50%;background:#7c3aed;color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
+  .rule .t{font-size:13px;line-height:1.6}
+  .rule .t b{color:#fff}
+  .rule .t span{color:#a99fce}
+
+  /* Troubleshooting table */
+  .ttable{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;font-size:12.5px;margin-top:4px;display:table}
+  .ttable th{background:#f1ecfd;color:var(--violet);text-align:left;font-weight:800;
+    padding:11px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+  .ttable td{padding:12px 14px;border-top:1px solid var(--line);vertical-align:top;color:#3d3954;line-height:1.6}
+  .ttable td:first-child{font-family:var(--mono);font-size:11.5px;color:#991b1b;white-space:normal;width:38%}
+  .ttable b{color:var(--ink)}
+
+  .foot{text-align:center;color:#9a93b5;font-size:12px;margin-top:40px;line-height:1.7}
+  .foot b{color:var(--muted)}
+  a{color:var(--violet);font-weight:600;text-decoration:none}
+  a:hover{text-decoration:underline}
+  hr.div{border:none;border-top:1px dashed var(--line);margin:30px 0}
+
+  @media (max-width:560px){
+    .hero h1{font-size:24px}
+    .part .who{display:none}
+    .ttable td:first-child{width:auto}
+    .ttable, .ttable thead, .ttable tbody, .ttable th, .ttable td, .ttable tr{display:block}
+    .ttable thead{display:none}
+    .ttable td{border-top:none}
+    .ttable tr{border-top:1px solid var(--line);padding:6px 0}
+    .ttable td:first-child{color:#991b1b;font-weight:700}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">⏱ QC Time Tracker · Team Sync</div>
+    <h1>Setup &amp; Fix Guide</h1>
+    <p>Everyone writes to their own file in one shared OneDrive folder, and the admin view merges them so the whole team sees every update. This guide makes that work for all 30 people — and fixes the “file is not granted to you” error.</p>
+    <div class="pill-row">
+      <span class="pill">No API needed</span>
+      <span class="pill">No Power Automate</span>
+      <span class="pill">Just OneDrive + Chrome / Edge</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- WHY IT BREAKS -->
+  <div class="note bad">
+    <b>If it “isn’t working for everyone,” it is almost always one of three OneDrive gaps</b> — not the extension. The folder was shared <b>view-only</b>, the member never <b>added the shortcut</b>, or the folder is still <b>online-only</b>. The three rules below close all three gaps. The new <b>🧪 Test Folder Access</b> button (v2.2) will also tell each person exactly which one they hit.
+  </div>
+
+  <!-- GOLDEN RULES -->
+  <div class="rules">
+    <h3>The 3 rules that make or break it</h3>
+    <div class="rule"><div class="k">1</div><div class="t"><b>Share with “Can edit” — never “Can view.”</b><br><span>View-only folders sync to the PC as read-only, so the extension can’t create the member’s file. This is the #1 cause of “not granted.”</span></div></div>
+    <div class="rule"><div class="k">2</div><div class="t"><b>Each member must “Add shortcut to My files.”</b><br><span>Until they do, the folder lives only on OneDrive-web and never lands on the PC, so the file picker can’t see it.</span></div></div>
+    <div class="rule"><div class="k">3</div><div class="t"><b>Each member must set “Always keep on this device.”</b><br><span>Online-only files (cloud icon) aren’t truly on disk. Reads/writes fail until the folder is pinned locally with a green check.</span></div></div>
+  </div>
+
+  <!-- PART A: ADMIN -->
+  <div class="part">
+    <span class="tag">PART&nbsp;A</span>
+    <h2>Create &amp; share the folder</h2>
+    <span class="who">Admin · once</span>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><div class="num">1</div><h3>Make one shared folder in OneDrive</h3></div>
+    <p>Do this from the OneDrive desktop folder on your own PC (File Explorer → OneDrive).</p>
+    <ol>
+      <li>Create a folder named exactly <code>QC-Team-Tracker</code></li>
+      <li>Right-click it → <b>“Always keep on this device”</b> (so your own copy is real and writable)</li>
+    </ol>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><div class="num">2</div><h3>Share it with “Can edit”</h3></div>
+    <ol>
+      <li>Right-click the folder → <b>Share</b> (or <b>OneDrive → Share</b>)</li>
+      <li>Click the permission selector (it usually reads “Can view”) and change it to <b>“Can edit”</b></li>
+      <li>Add all 30 members by their <b>work email</b>, or create a “Can edit” link and send it</li>
+      <li>Send</li>
+    </ol>
+    <div class="note warn"><b>Check this twice.</b> If a member ever sees “not granted” even after pinning the folder, their invite was almost certainly “Can view.” Re-share to that person with <b>Can edit</b>, then have them remove and re-add the shortcut.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><div class="num">3</div><h3>Send members two things</h3></div>
+    <ul>
+      <li>The <b>“Can edit” share link</b> to <code>QC-Team-Tracker</code></li>
+      <li>The <b>extension ZIP</b> + this guide</li>
+    </ul>
+    <div class="note ok">✓ That’s the entire admin job. You never have to touch Power Automate, the Graph API, or any automation. Members do the rest once each.</div>
+  </div>
+
+  <hr class="div" />
+
+  <!-- PART B: MEMBER -->
+  <div class="part">
+    <span class="tag">PART&nbsp;B</span>
+    <h2>Connect on each PC</h2>
+    <span class="who">Every member · ~5 min</span>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><div class="num">1</div><h3>Add the folder to your OneDrive</h3></div>
+    <ol>
+      <li>Open the share email and click <b>Open</b> — or go to <a href="https://www.onedrive.com" target="_blank" rel="noopener">onedrive.com</a> → <b>Shared</b></li>
+      <li>Find <code>QC-Team-Tracker</code> → click <b>“Add shortcut to My files”</b></li>
+      <li>Wait 1–2 minutes</li>
+    </ol>
+    <div class="note warn">If you don’t see <b>“Add shortcut to My files,”</b> open the <b>“⋯”</b> menu on the folder, or check whether it’s already under File Explorer → OneDrive.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><div class="num">2</div><h3>Pin it to your PC (the step people skip)</h3></div>
+    <ol>
+      <li>Open <b>File Explorer → OneDrive</b> — you should now see <code>QC-Team-Tracker</code></li>
+      <li>Right-click it → <b>“Always keep on this device”</b></li>
+      <li>Wait until the folder shows a solid <b>green check</b> (not a cloud)</li>
+    </ol>
+    <div class="note bad"><b>Skipping this causes the write to fail.</b> A cloud icon means the files are online-only and not really on disk yet.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><div class="num">3</div><h3>Load the extension (Chrome or Edge)</h3></div>
+    <ol>
+      <li>Unzip the extension to a permanent folder (don’t delete it afterwards)</li>
+      <li>Go to <code>chrome://extensions</code> &nbsp;(<b>on Edge use</b> <code>edge://extensions</code>)</li>
+      <li>Turn on <b>Developer mode</b> (top-right on Chrome, bottom-left on Edge)</li>
+      <li>Click <b>Load unpacked</b> → select the unzipped folder</li>
+      <li>Pin the <b>⏱ QC Time Tracker</b> icon to the toolbar</li>
+    </ol>
+    <div class="note ok">✓ Microsoft <b>Edge is fully supported</b> — it’s built on the same engine as Chrome. Any “Chrome” wording in prompts applies to Edge too.</div>
+    <div class="note warn">Desktop Chrome or Edge only. The folder-picker isn’t available in other browsers or on mobile.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><div class="num">4</div><h3>Connect the folder &amp; test</h3></div>
+    <ol>
+      <li>Open the extension → sign in with your <b>Name + Email</b></li>
+      <li>Click <b>⚙️ Settings</b> → <b>🔗 Open in Full Tab</b> <span style="color:var(--muted)">(the picker needs a full tab, not the small popup)</span></li>
+      <li>Click <b>📁 Choose Shared Folder</b> → in File Explorer go to <b>OneDrive → QC-Team-Tracker</b> → <b>Select Folder</b> → <b>Allow</b></li>
+      <li>Click <b>🧪 Test Folder Access</b></li>
+    </ol>
+    <div class="note ok">✓ Success looks like: <b>“All good. The folder is writable and synced. Your team file: <code>qc-time-tracker-team-yourname.json</code>.”</b> If you see anything else, the test now tells you the exact cause — see the table below.</div>
+  </div>
+
+  <!-- RESTART -->
+  <div class="part">
+    <span class="tag">DAILY</span>
+    <h2>After every Chrome restart</h2>
+    <span class="who">5 seconds</span>
+  </div>
+  <div class="step">
+    <p>For security, Chrome/Edge forgets folder access when it fully restarts. You do <b>not</b> re-pick the folder — just re-grant:</p>
+    <ol>
+      <li>Open the extension → <b>⚙️ Settings</b></li>
+      <li>Click <b>🔑 Re-grant Folder Access</b> — it opens a full tab (the prompt closes the small popup, so this is automatic)</li>
+      <li>In that tab, click <b>🔑 Re-grant Folder Access</b> again → when the prompt appears choose <b>Edit / Allow</b> (not “View only”)</li>
+    </ol>
+    <div class="note warn">Once per browser session, not every time you use it. Choosing <b>Edit</b> is what makes it stick — “View only” will keep failing.</div>
+  </div>
+
+  <!-- TROUBLESHOOTING -->
+  <div class="part">
+    <span class="tag">FIX</span>
+    <h2>Message → cause → fix</h2>
+  </div>
+  <table class="ttable">
+    <thead><tr><th>What the member sees</th><th>What it means &amp; how to fix it</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>“The folder is connected but the extension can’t write into it.”</td>
+        <td><b>Read-only or online-only folder.</b> 1) Confirm the admin shared it as <b>Can edit</b> (not Can view). 2) Right-click the folder in OneDrive → <b>Always keep on this device</b>, wait for the green check. 3) Make sure you picked the folder inside <b>File Explorer → OneDrive</b>, not a web page. Then test again.</td>
+      </tr>
+      <tr>
+        <td>“Permission was not granted” — Re-grant keeps failing no matter how many times I click</td>
+        <td><b>The prompt is closing the small popup.</b> The new build opens a full tab automatically when you click <b>🔑 Re-grant Folder Access</b>. In that tab, click the button again and choose <b>Edit</b> on the prompt. (If you’re on an older build, click <b>🔗 Open in Full Tab</b> first.) Also make sure you don’t pick <b>“View only”</b> on the prompt.</td>
+      </tr>
+      <tr>
+        <td>“Chrome/Edge needs you to allow access again” / “permission denied” after restart</td>
+        <td><b>Normal after a browser restart.</b> Click <b>🔑 Re-grant Folder Access</b>, then choose <b>Edit</b> in the full tab. No need to re-pick the folder.</td>
+      </tr>
+      <tr>
+        <td>“No folder connected on this PC yet.”</td>
+        <td>You haven’t selected the folder on this machine. Click <b>📁 Choose Shared Folder</b> and pick <b>OneDrive → QC-Team-Tracker</b>.</td>
+      </tr>
+      <tr>
+        <td>The folder picker won’t open / the popup keeps closing</td>
+        <td>The small popup can’t host the picker. Click <b>🔗 Open in Full Tab</b> first, then <b>📁 Choose Shared Folder</b>.</td>
+      </tr>
+      <tr>
+        <td>Folder isn’t in the picker at all</td>
+        <td>It never synced down. Re-do <b>Add shortcut to My files</b>, wait 1–2 min, confirm it appears under <b>File Explorer → OneDrive</b>, then pin it.</td>
+      </tr>
+      <tr>
+        <td>“This browser can’t do folder sync.”</td>
+        <td>You’re not in Chrome/Edge desktop. Open it in <b>Google Chrome</b> or <b>Microsoft Edge</b>.</td>
+      </tr>
+      <tr>
+        <td>I can write my file, but I don’t see other people’s entries</td>
+        <td>Open the <b>admin view</b> and click <b>↻ Refresh Team Data</b>. If still missing, the other members haven’t pinned/granted yet, or OneDrive is mid-sync — wait a minute and refresh.</td>
+      </tr>
+      <tr>
+        <td>Two people seem to overwrite each other</td>
+        <td>They’re signed in with the <b>same email</b>. Each person must use their <b>own</b> email so they get their own file.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note ok" style="margin-top:18px">
+    <b>One-line health check for the admin:</b> open <b>File Explorer → OneDrive → QC-Team-Tracker</b>. You should see one <code>qc-time-tracker-team-*.json</code> per active member, each with a green check. Missing names = those people haven’t finished Part&nbsp;B.
+  </div>
+
+  <div class="foot">
+    QC Time Tracker · v2.3 — Edge support + full-tab re-grant fix<br />
+    <b>Each member writes their own file; the admin view merges all files.</b><br />
+    Setup once per PC · Re-grant once per Chrome session · No API or automation required.
+  </div>
+
+</div>
+</body>
+</html>

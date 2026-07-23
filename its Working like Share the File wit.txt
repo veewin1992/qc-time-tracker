@@ -1,0 +1,1 @@
+its Working like Share the File with the team with onedrive and make it shotcut web to Local File and in Extention i have to upload the file but the thing is When i created and share the file to the team. the file is not shown in web onedrive in shared and for some people its shown but while upload in extenion its shows the file is not granted to you. need to fix it 
