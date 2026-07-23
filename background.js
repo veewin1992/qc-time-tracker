@@ -1,12 +1,12 @@
-// Background Service Worker — QC Time Tracker
+// Background Service Worker — Retail AdCopy
 // Fires a Chrome notification when a running timer passes REMINDER_MINUTES,
 // then again at each further interval, WITHOUT ever pausing the timer.
 // Works whether the popup is open or closed (driven by chrome.alarms).
 
-const APP_NAME = 'QC Time Tracker';
-const REMINDER_MINUTES = 4;          // <-- reminder interval for this extension
-const POLL_ALARM = 'qc-reminder-poll';
-const NOTIF_ID = 'qc-timer-reminder';
+const APP_NAME = 'Retail AdCopy';
+const REMINDER_MINUTES = 5;          // <-- reminder interval for this extension
+const POLL_ALARM = 'radcopy-reminder-poll';
+const NOTIF_ID = 'radcopy-timer-reminder';
 
 // Keep a 1-minute heartbeat alarm alive so the worker can check the timer
 // even when the popup is closed.

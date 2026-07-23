@@ -1,11 +1,9 @@
-// QC Time Tracker — Enhanced Version 3.0
+// Retail AdCopy — Time Tracker
 // Multi-tab support for tracking multiple tickets simultaneously
 
 const TICKET_TYPES = [
-  "Ad Copy","Ad Copy VIP","Ampersand","Ampersand Broken Rule",
-  "Ampersand Digital","Ampersand Digital AA","Ampersand Digital AA Political","Ampersand Digital Political","Ampersand Dish",
-  "Ampersand Political","Ampersand Political Dish","Ampersand Tune In","Ampersand VIP",
-  "Audience Addressable Retail","Digital & Linear Ad Copy","Digital Ad Copy","Political - Linear"
+  "Ad Copy","Ad Copy VIP","Audience Addressable Retail",
+  "Digital & Linear Ad Copy","Digital Ad Copy","Political - Linear","Sweeps"
 ];
 
 // Detect if running inside the small popup or a full browser tab.
@@ -47,7 +45,7 @@ const TEAM_SYNC_DB_NAME = 'qc-time-tracker-folder-sync';
 const TEAM_SYNC_DB_VERSION = 1;
 const TEAM_SYNC_HANDLE_STORE = 'handles';
 const TEAM_SYNC_FOLDER_KEY = 'shared-team-folder';
-const TEAM_FILE_PREFIX = 'qc-time-tracker-team-';
+const TEAM_FILE_PREFIX = 'retail-adcopy-team-';
 const TEAM_FILE_EXTENSION = '.json';
 // Cache the folder handle in memory so re-grant can call requestPermission()
 // directly inside the click gesture — an IndexedDB await first can drop the
@@ -79,6 +77,8 @@ function createSession() {
     ticketType: '',
     numOrders: '',
     orderNumber: '',
+    process: '',
+    linesUnits: '',   // "Lines / units / VT / PX / QT" — Yes/No
     comment: '',
     startTime: null,
     firstStartTime: null,     // true session start — set once, never overwritten by pause/resume/reopen
@@ -107,7 +107,7 @@ function getSessionDuration(session) {
 function hasSessionData(session) {
   // Check if session has any meaningful data
   return !!(session.ticketNo || session.clientName || session.ticketType || 
-           session.numOrders || session.orderNumber || session.comment || session.accumulated || 
+           session.numOrders || session.orderNumber || session.process || session.comment || session.accumulated || 
            session.startTime || session.pauseTimes.length > 0);
 }
 
@@ -1076,6 +1076,8 @@ function switchSession(sessionId) {
   const current = getActiveSession();
   if (current) {
     current.ticketNo = document.getElementById("f-ticket").value.trim();
+    current.process = document.getElementById("f-process").value;
+    current.linesUnits = document.getElementById("f-linesunits").value;
     current.clientName = document.getElementById("f-client").value.trim();
     current.ticketType = selectedType;
     current.numOrders = document.getElementById("f-orders").value.trim();
@@ -1099,6 +1101,8 @@ function newSession() {
   const current = getActiveSession();
   if (current) {
     current.ticketNo = document.getElementById("f-ticket").value.trim();
+    current.process = document.getElementById("f-process").value;
+    current.linesUnits = document.getElementById("f-linesunits").value;
     current.clientName = document.getElementById("f-client").value.trim();
     current.ticketType = selectedType;
     current.numOrders = document.getElementById("f-orders").value.trim();
@@ -1181,6 +1185,39 @@ async function loadSessions() {
   }
 }
 
+// ──── Process segmented toggle ────
+function syncProcessButtons() {
+  const el = document.getElementById('f-process');
+  const val = el ? el.value : '';
+  document.querySelectorAll('#f-process-seg .seg-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.value === val);
+  });
+}
+
+function setProcess(val) {
+  const hid = document.getElementById('f-process');
+  if (hid) hid.value = val;
+  syncProcessButtons();
+  const session = getActiveSession();
+  if (session) { session.process = val; saveSessions(); }
+}
+
+function syncLinesUnitsButtons() {
+  const el = document.getElementById('f-linesunits');
+  const val = el ? el.value : '';
+  document.querySelectorAll('#f-linesunits-seg .seg-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.value === val);
+  });
+}
+
+function setLinesUnits(val) {
+  const hid = document.getElementById('f-linesunits');
+  if (hid) hid.value = val;
+  syncLinesUnitsButtons();
+  const session = getActiveSession();
+  if (session) { session.linesUnits = val; saveSessions(); }
+}
+
 function loadSessionToForm() {
   const session = getActiveSession();
   if (!session) {
@@ -1189,6 +1226,8 @@ function loadSessionToForm() {
   }
   
   document.getElementById("f-ticket").value = session.ticketNo || '';
+  document.getElementById("f-process").value = session.process || '';
+  syncProcessButtons();
   document.getElementById("f-client").value = session.clientName || '';
   document.getElementById("f-orders").value = session.numOrders || '';
   document.getElementById("f-ordernum").value = session.orderNumber || '';
@@ -1201,10 +1240,15 @@ function loadSessionToForm() {
     selectedType = '';
     document.getElementById("tt-badge").innerHTML = '';
   }
+
+  document.getElementById("f-linesunits").value = session.linesUnits || '';
+  syncLinesUnitsButtons();
 }
 
 function resetFormFields() {
   document.getElementById("f-ticket").value  = "";
+  document.getElementById("f-process").value = "";
+  syncProcessButtons();
   document.getElementById("f-client").value  = "";
   document.getElementById("f-orders").value  = "";
   document.getElementById("f-ordernum").value = "";
@@ -1212,6 +1256,8 @@ function resetFormFields() {
   document.getElementById("tt-search").value = "";
   document.getElementById("tt-badge").innerHTML = "";
   selectedType = "";
+  document.getElementById("f-linesunits").value = "";
+  syncLinesUnitsButtons();
 }
 
 // ══════════════ BACKGROUND SYNC ══════════════
@@ -1430,13 +1476,15 @@ async function submitEntry() {
   }
 
   const ticket  = document.getElementById("f-ticket").value.trim();
+  const process = document.getElementById("f-process").value;
+  const linesUnits = document.getElementById("f-linesunits").value;
   const client  = document.getElementById("f-client").value.trim();
   const orders  = document.getElementById("f-orders").value.trim();
   const orderNumber = normalizeOrderNumbers(document.getElementById("f-ordernum").value);
   const comment = document.getElementById("f-comment").value.trim();
 
-  if (!ticket || !client || !selectedType) {
-    flash("tr-msg", "⚠ Fill in Ticket No., Client Name and Ticket Type.", false);
+  if (!process || !ticket || !client || !selectedType || !linesUnits) {
+    flash("tr-msg", "⚠ Fill in Process, Ticket No., Client Name, Ticket Type and Lines / units / VT / PX / QT.", false);
     return;
   }
 
@@ -1451,7 +1499,6 @@ async function submitEntry() {
     return;
   }
 
-  // Format timestamps in HH:MM:SS 24-hour format (local system time)
   // Format timestamps in HH:MM:SS 24-hour format (local system time)
   // Use the true session start (unaffected by pause/resume/reopen), falling back
   // to the working checkpoint only for sessions created before this field existed.
@@ -1471,6 +1518,8 @@ async function submitEntry() {
     date:       new Date().toISOString().split("T")[0],
     userName:   currentUser.name,
     userEmail:  currentUser.email,
+    process:    process,
+    linesUnits: linesUnits,
     ticketNo:   ticket,
     clientName: client,
     ticketType: selectedType,
@@ -1615,8 +1664,8 @@ function renderTable() {
     <div class="tbl-wrap">
       <table>
         <thead><tr>
-          <th>Date</th><th>Name</th><th>Ticket No</th><th>Ticket Type</th>
-          <th>Orders</th><th>Order No.</th><th>Client</th><th>Duration</th><th>Comment</th><th>Actions</th>
+          <th>Date</th><th>Name</th><th>Process</th><th>Ticket No</th><th>Ticket Type</th>
+          <th>Lines/Units</th><th>Orders</th><th>Order No.</th><th>Client</th><th>Duration</th><th>Comment</th><th>Actions</th>
         </tr></thead>
         <tbody>
           ${data.map(e => {
@@ -1624,8 +1673,10 @@ function renderTable() {
             return `<tr>
             <td>${e.date}</td>
             <td><span class="bp">${e.userName}</span></td>
+            <td>${e.process || "—"}</td>
             <td><span class="bb">${e.ticketNo}</span></td>
             <td style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.ticketType}</td>
+            <td style="text-align:center">${e.linesUnits || "—"}</td>
             <td style="text-align:center">${e.numOrders || "—"}</td>
             <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.orderNumber || "—"}</td>
             <td>${e.clientName}</td>
@@ -1657,6 +1708,14 @@ function showEditDialog(entry) {
       <div class="edit-box">
         <div class="edit-title">✏️ Edit Ticket — ${escapeHtml(entry.userName)}</div>
         <div class="edit-field">
+          <label>Process</label>
+          <input type="hidden" id="ed-process" value="${escapeHtml(entry.process)}" />
+          <div class="edit-seg" id="ed-process-seg">
+            <button type="button" data-value="SMB" class="${entry.process === 'SMB' ? 'active' : ''}">SMB</button>
+            <button type="button" data-value="Retail CSM" class="${entry.process === 'Retail CSM' ? 'active' : ''}">Retail CSM</button>
+          </div>
+        </div>
+        <div class="edit-field">
           <label>Ticket No.</label>
           <input type="text" id="ed-ticket" value="${escapeHtml(entry.ticketNo)}" />
         </div>
@@ -1667,6 +1726,14 @@ function showEditDialog(entry) {
         <div class="edit-field">
           <label>Ticket Type</label>
           <select id="ed-type">${typeOptions}</select>
+        </div>
+        <div class="edit-field">
+          <label>Lines / units / VT / PX / QT</label>
+          <input type="hidden" id="ed-linesunits" value="${escapeHtml(entry.linesUnits)}" />
+          <div class="edit-seg" id="ed-linesunits-seg">
+            <button type="button" data-value="Yes" class="${entry.linesUnits === 'Yes' ? 'active' : ''}">Yes</button>
+            <button type="button" data-value="No" class="${entry.linesUnits === 'No' ? 'active' : ''}">No</button>
+          </div>
         </div>
         <div class="edit-field">
           <label>Number of Orders</label>
@@ -1690,20 +1757,38 @@ function showEditDialog(entry) {
   document.body.insertAdjacentHTML('beforeend', dialogHTML);
   const dialog = document.getElementById('edit-dialog');
 
+  dialog.querySelectorAll('#ed-process-seg button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      dialog.querySelectorAll('#ed-process-seg button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('ed-process').value = btn.dataset.value;
+    });
+  });
+
+  dialog.querySelectorAll('#ed-linesunits-seg button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      dialog.querySelectorAll('#ed-linesunits-seg button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('ed-linesunits').value = btn.dataset.value;
+    });
+  });
+
   document.getElementById('ed-cancel').addEventListener('click', () => dialog.remove());
   dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.remove(); });
 
   document.getElementById('ed-save').addEventListener('click', async () => {
     const updates = {
+      process:     document.getElementById('ed-process').value,
       ticketNo:    document.getElementById('ed-ticket').value.trim(),
       clientName:  document.getElementById('ed-client').value.trim(),
       ticketType:  document.getElementById('ed-type').value,
+      linesUnits:  document.getElementById('ed-linesunits').value,
       numOrders:   document.getElementById('ed-orders').value.trim(),
       orderNumber: normalizeOrderNumbers(document.getElementById('ed-ordernum').value),
       comment:     document.getElementById('ed-comment').value.trim()
     };
-    if (!updates.ticketNo || !updates.clientName || !updates.ticketType) {
-      setAdminStatus('⚠ Ticket No., Client Name and Ticket Type cannot be empty.', 'warn');
+    if (!updates.process || !updates.ticketNo || !updates.clientName || !updates.ticketType || !updates.linesUnits) {
+      setAdminStatus('⚠ Process, Ticket No., Client Name, Ticket Type and Lines / units / VT / PX / QT cannot be empty.', 'warn');
       return;
     }
 
@@ -1797,9 +1882,9 @@ function downloadCSV() {
   const data = getFiltered();
   if (!data.length) { alert("No records to export."); return; }
 
-  const headers = ["Date","Name","Ticket No","Ticket Type","No. of Orders","Order Number","Client Name","Total Duration","Start Time","Pause Times","Resume Times","End Time","Comment"];
+  const headers = ["Date","Name","Process","Ticket No","Ticket Type","Lines/Units/VT/PX/QT","No. of Orders","Order Number","Client Name","Total Duration","Start Time","Pause Times","Resume Times","End Time","Comment"];
   const rows    = data.map(e => [
-    e.date, e.userName, e.ticketNo, e.ticketType,
+    e.date, e.userName, e.process || "", e.ticketNo, e.ticketType, e.linesUnits || "",
     e.numOrders || "", e.orderNumber || "", e.clientName, e.duration, 
     e.startTime || "", e.pauseTimes || "", e.resumeTimes || "", e.stopTime || "",
     e.comment || ""
@@ -1813,7 +1898,7 @@ function downloadCSV() {
   const from = document.getElementById("f-date-from").value;
   const to   = document.getElementById("f-date-to").value;
   const fDate = from || to ? `${from || 'start'}_to_${to || 'today'}` : "";
-  const fname = `QC_Tracker_${fUser === "all" ? "All_Users" : fUser}${fDate ? "_" + fDate : ""}.csv`;
+  const fname = `RetailAdCopy_${fUser === "all" ? "All_Users" : fUser}${fDate ? "_" + fDate : ""}.csv`;
 
   const a  = document.createElement("a");
   a.href   = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
@@ -2160,6 +2245,16 @@ function attachEventListeners() {
     }
   });
 
+  // Process segmented toggle: pick one option (SMB / Retail CSM)
+  document.querySelectorAll('#f-process-seg .seg-btn').forEach(btn => {
+    btn.addEventListener('click', () => setProcess(btn.dataset.value));
+  });
+
+  // Lines / units / VT / PX / QT segmented toggle: pick Yes or No
+  document.querySelectorAll('#f-linesunits-seg .seg-btn').forEach(btn => {
+    btn.addEventListener('click', () => setLinesUnits(btn.dataset.value));
+  });
+
   // Order Number: tidy the pasted value into clean comma-separated form on blur
   const fOrderNum = document.getElementById('f-ordernum');
   if (fOrderNum) {
@@ -2267,10 +2362,10 @@ function attachEventListeners() {
         if (resultEl) resultEl.innerHTML = '<span style="color:#ef4444">❌ This browser build has no notifications API available to the extension.</span>';
         return;
       }
-      chrome.notifications.create('qc-test-notif', {
+      chrome.notifications.create('radcopy-test-notif', {
         type: 'basic',
         iconUrl: chrome.runtime.getURL('icons/icon128.png'),
-        title: '🔔 QC Time Tracker — test notification',
+        title: '🔔 Retail AdCopy — test notification',
         message: 'If you can see this, notifications are working correctly on this PC.',
         priority: 2
       }, (notificationId) => {
@@ -2287,7 +2382,7 @@ function attachEventListeners() {
 
 async function init() {
   try {
-    console.log('Initializing QC Time Tracker...');
+    console.log('Initializing Retail AdCopy...');
 
     // Detect tab mode (full browser tab vs small popup)
     if (window.innerWidth > 500) {

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>QC Time Tracker — Team Setup &amp; Fix Guide</title>
+<title>Retail AdCopy — Team Setup &amp; Fix Guide</title>
 <style>
   :root{
     --violet:#6d28d9; --violet-2:#4f46e5; --ink:#1e1b2e; --muted:#5b5772;
@@ -110,7 +110,7 @@
 
 <header class="hero">
   <div class="wrap">
-    <div class="eyebrow">⏱ QC Time Tracker · Team Sync</div>
+    <div class="eyebrow">⏱ Retail AdCopy · Team Sync</div>
     <h1>Setup &amp; Fix Guide</h1>
     <p>Everyone writes to their own file in one shared OneDrive folder, and the admin view merges them so the whole team sees every update. This guide makes that work for all 30 people — and fixes the “file is not granted to you” error.</p>
     <div class="pill-row">
@@ -147,7 +147,7 @@
     <div class="step-head"><div class="num">1</div><h3>Make one shared folder in OneDrive</h3></div>
     <p>Do this from the OneDrive desktop folder on your own PC (File Explorer → OneDrive).</p>
     <ol>
-      <li>Create a folder named exactly <code>QC-Team-Tracker</code></li>
+      <li>Create a folder named exactly <code>RetailAdCopy-Team</code></li>
       <li>Right-click it → <b>“Always keep on this device”</b> (so your own copy is real and writable)</li>
     </ol>
   </div>
@@ -166,7 +166,7 @@
   <div class="step">
     <div class="step-head"><div class="num">3</div><h3>Send members two things</h3></div>
     <ul>
-      <li>The <b>“Can edit” share link</b> to <code>QC-Team-Tracker</code></li>
+      <li>The <b>“Can edit” share link</b> to <code>RetailAdCopy-Team</code></li>
       <li>The <b>extension ZIP</b> + this guide</li>
     </ul>
     <div class="note ok">✓ That’s the entire admin job. You never have to touch Power Automate, the Graph API, or any automation. Members do the rest once each.</div>
@@ -185,7 +185,7 @@
     <div class="step-head"><div class="num">1</div><h3>Add the folder to your OneDrive</h3></div>
     <ol>
       <li>Open the share email and click <b>Open</b> — or go to <a href="https://www.onedrive.com" target="_blank" rel="noopener">onedrive.com</a> → <b>Shared</b></li>
-      <li>Find <code>QC-Team-Tracker</code> → click <b>“Add shortcut to My files”</b></li>
+      <li>Find <code>RetailAdCopy-Team</code> → click <b>“Add shortcut to My files”</b></li>
       <li>Wait 1–2 minutes</li>
     </ol>
     <div class="note warn">If you don’t see <b>“Add shortcut to My files,”</b> open the <b>“⋯”</b> menu on the folder, or check whether it’s already under File Explorer → OneDrive.</div>
@@ -194,7 +194,7 @@
   <div class="step">
     <div class="step-head"><div class="num">2</div><h3>Pin it to your PC (the step people skip)</h3></div>
     <ol>
-      <li>Open <b>File Explorer → OneDrive</b> — you should now see <code>QC-Team-Tracker</code></li>
+      <li>Open <b>File Explorer → OneDrive</b> — you should now see <code>RetailAdCopy-Team</code></li>
       <li>Right-click it → <b>“Always keep on this device”</b></li>
       <li>Wait until the folder shows a solid <b>green check</b> (not a cloud)</li>
     </ol>
@@ -208,7 +208,7 @@
       <li>Go to <code>chrome://extensions</code> &nbsp;(<b>on Edge use</b> <code>edge://extensions</code>)</li>
       <li>Turn on <b>Developer mode</b> (top-right on Chrome, bottom-left on Edge)</li>
       <li>Click <b>Load unpacked</b> → select the unzipped folder</li>
-      <li>Pin the <b>⏱ QC Time Tracker</b> icon to the toolbar</li>
+      <li>Pin the <b>⏱ Retail AdCopy</b> icon to the toolbar</li>
     </ol>
     <div class="note ok">✓ Microsoft <b>Edge is fully supported</b> — it’s built on the same engine as Chrome. Any “Chrome” wording in prompts applies to Edge too.</div>
     <div class="note warn">Desktop Chrome or Edge only. The folder-picker isn’t available in other browsers or on mobile.</div>
@@ -219,10 +219,10 @@
     <ol>
       <li>Open the extension → sign in with your <b>Name + Email</b></li>
       <li>Click <b>⚙️ Settings</b> → <b>🔗 Open in Full Tab</b> <span style="color:var(--muted)">(the picker needs a full tab, not the small popup)</span></li>
-      <li>Click <b>📁 Choose Shared Folder</b> → in File Explorer go to <b>OneDrive → QC-Team-Tracker</b> → <b>Select Folder</b> → <b>Allow</b></li>
+      <li>Click <b>📁 Choose Shared Folder</b> → in File Explorer go to <b>OneDrive → RetailAdCopy-Team</b> → <b>Select Folder</b> → <b>Allow</b></li>
       <li>Click <b>🧪 Test Folder Access</b></li>
     </ol>
-    <div class="note ok">✓ Success looks like: <b>“All good. The folder is writable and synced. Your team file: <code>qc-time-tracker-team-yourname.json</code>.”</b> If you see anything else, the test now tells you the exact cause — see the table below.</div>
+    <div class="note ok">✓ Success looks like: <b>“All good. The folder is writable and synced. Your team file: <code>retail-adcopy-team-yourname.json</code>.”</b> If you see anything else, the test now tells you the exact cause — see the table below.</div>
   </div>
 
   <!-- RESTART -->
@@ -263,7 +263,7 @@
       </tr>
       <tr>
         <td>“No folder connected on this PC yet.”</td>
-        <td>You haven’t selected the folder on this machine. Click <b>📁 Choose Shared Folder</b> and pick <b>OneDrive → QC-Team-Tracker</b>.</td>
+        <td>You haven’t selected the folder on this machine. Click <b>📁 Choose Shared Folder</b> and pick <b>OneDrive → RetailAdCopy-Team</b>.</td>
       </tr>
       <tr>
         <td>The folder picker won’t open / the popup keeps closing</td>
@@ -289,11 +289,11 @@
   </table>
 
   <div class="note ok" style="margin-top:18px">
-    <b>One-line health check for the admin:</b> open <b>File Explorer → OneDrive → QC-Team-Tracker</b>. You should see one <code>qc-time-tracker-team-*.json</code> per active member, each with a green check. Missing names = those people haven’t finished Part&nbsp;B.
+    <b>One-line health check for the admin:</b> open <b>File Explorer → OneDrive → RetailAdCopy-Team</b>. You should see one <code>retail-adcopy-team-*.json</code> per active member, each with a green check. Missing names = those people haven’t finished Part&nbsp;B.
   </div>
 
   <div class="foot">
-    QC Time Tracker · v2.3 — Edge support + full-tab re-grant fix<br />
+    Retail AdCopy · v2.3 — Edge support + full-tab re-grant fix<br />
     <b>Each member writes their own file; the admin view merges all files.</b><br />
     Setup once per PC · Re-grant once per Chrome session · No API or automation required.
   </div>

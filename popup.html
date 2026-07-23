@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>QC Time Tracker</title>
+<title>Retail AdCopy</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html{background:#07071a}
@@ -119,6 +119,16 @@ body[data-theme="light"] .theme-swatch.selected{border-color:#7c3aed;color:#1e29
 .field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(124,58,237,.5);background:#13132a}
 .field textarea{resize:vertical;min-height:72px;line-height:1.5}
 .req{color:#ef4444}
+
+/* Segmented toggle (Process) — pill switch like the reference */
+.seg{display:flex;gap:6px;background:#11112b;border:1px solid #1c1c3a;border-radius:12px;padding:5px}
+.seg-btn{flex:1;padding:11px 12px;border:none;border-radius:9px;background:transparent;color:#94a3b8;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit;letter-spacing:.2px;transition:background .18s,color .18s,box-shadow .18s}
+.seg-btn:hover{color:#cbd5e1}
+.seg-btn.active{background:linear-gradient(135deg,#0f766e,#0e7490);color:#fff;box-shadow:0 3px 12px rgba(13,148,136,.4)}
+body[data-theme="light"] .seg{background:#eef2f4;border-color:#e2e8f0}
+body[data-theme="light"] .seg-btn{color:#64748b}
+body[data-theme="light"] .seg-btn:hover{color:#334155}
+body[data-theme="light"] .seg-btn.active{background:linear-gradient(135deg,#0f766e,#0e7490);color:#fff;box-shadow:0 3px 12px rgba(14,116,144,.3)}
 
 /* Dropdown */
 .dd-wrap{position:relative}
@@ -317,8 +327,8 @@ body[data-theme="light"] .sec-label{color:#5b6b6a}
 <div id="screen-login" class="screen active">
   <div class="login-wrap">
     <div class="login-card">
-      <div class="login-icon">QC</div>
-      <div class="login-title">QC Time Tracker</div>
+      <div class="login-icon">Rt</div>
+      <div class="login-title">Retail AdCopy</div>
       <div class="login-sub">Sign in to start tracking your work</div>
       <div class="field">
         <label>Full Name <span class="req">*</span></label>
@@ -342,9 +352,9 @@ body[data-theme="light"] .sec-label{color:#5b6b6a}
 <div id="screen-tracker" class="screen">
   <div class="hdr">
     <div class="hdr-logo">
-      <div class="hdr-icon">QC</div>
+      <div class="hdr-icon">Rt</div>
       <div>
-        <div class="hdr-title">QC Time Tracker</div>
+        <div class="hdr-title">Retail AdCopy</div>
         <div class="hdr-sub" id="tr-user">👤 —</div>
       </div>
     </div>
@@ -363,6 +373,15 @@ body[data-theme="light"] .sec-label{color:#5b6b6a}
   </div>
   
   <div class="content">
+    <div class="field">
+      <label>Process <span class="req">*</span></label>
+      <input type="hidden" id="f-process" />
+      <div class="seg" id="f-process-seg">
+        <button type="button" class="seg-btn" data-value="SMB">SMB</button>
+        <button type="button" class="seg-btn" data-value="Retail CSM">Retail CSM</button>
+      </div>
+    </div>
+
     <div class="g2">
       <div class="field">
         <label>Ticket No. <span class="req">*</span></label>
@@ -385,6 +404,15 @@ body[data-theme="light"] .sec-label{color:#5b6b6a}
         <div class="dd-list" id="tt-list"></div>
       </div>
       <div id="tt-badge"></div>
+    </div>
+
+    <div class="field">
+      <label>Lines / units / VT / PX / QT <span class="req">*</span></label>
+      <input type="hidden" id="f-linesunits" />
+      <div class="seg" id="f-linesunits-seg">
+        <button type="button" class="seg-btn" data-value="Yes">Yes</button>
+        <button type="button" class="seg-btn" data-value="No">No</button>
+      </div>
     </div>
 
     <div class="field">
